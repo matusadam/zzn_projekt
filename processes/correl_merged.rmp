@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="9.3.001">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="9.3.001" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="retrieve" compatibility="9.3.001" expanded="true" height="68" name="Retrieve student-por" width="90" x="45" y="85">
+        <parameter key="repository_entry" value="//Local Repository/student-por"/>
+      </operator>
+      <operator activated="true" class="retrieve" compatibility="9.3.001" expanded="true" height="68" name="Retrieve student-mat" width="90" x="45" y="187">
+        <parameter key="repository_entry" value="//Local Repository/student-mat"/>
+      </operator>
+      <operator activated="true" class="append" compatibility="9.3.001" expanded="true" height="103" name="Append" width="90" x="179" y="85">
+        <parameter key="datamanagement" value="double_array"/>
+        <parameter key="data_management" value="auto"/>
+        <parameter key="merge_type" value="all"/>
+      </operator>
+      <operator activated="true" class="remove_duplicates" compatibility="9.3.001" expanded="true" height="103" name="Remove Duplicates" width="90" x="313" y="85">
+        <parameter key="attribute_filter_type" value="subset"/>
+        <parameter key="attribute" value=""/>
+        <parameter key="attributes" value="|age|school|sex|guardian|nursery|address|famsize|Fedu|Fjob|internet|Medu|Mjob|Pstatus|reason"/>
+        <parameter key="use_except_expression" value="false"/>
+        <parameter key="value_type" value="attribute_value"/>
+        <parameter key="use_value_type_exception" value="false"/>
+        <parameter key="except_value_type" value="time"/>
+        <parameter key="block_type" value="attribute_block"/>
+        <parameter key="use_block_type_exception" value="false"/>
+        <parameter key="except_block_type" value="value_matrix_row_start"/>
+        <parameter key="invert_selection" value="false"/>
+        <parameter key="include_special_attributes" value="false"/>
+        <parameter key="treat_missing_values_as_duplicates" value="false"/>
+      </operator>
+      <operator activated="true" class="multiply" compatibility="9.3.001" expanded="true" height="103" name="Multiply" width="90" x="447" y="59"/>
+      <operator activated="true" class="filter_examples" compatibility="9.3.001" expanded="true" height="103" name="School = MS" width="90" x="581" y="34">
+        <parameter key="parameter_expression" value=""/>
+        <parameter key="condition_class" value="custom_filters"/>
+        <parameter key="invert_filter" value="false"/>
+        <list key="filters_list">
+          <parameter key="filters_entry_key" value="school.equals.MS"/>
+        </list>
+        <parameter key="filters_logic_and" value="true"/>
+        <parameter key="filters_check_metadata" value="true"/>
+      </operator>
+      <operator activated="true" class="filter_examples" compatibility="9.3.001" expanded="true" height="103" name="School = GP" width="90" x="581" y="187">
+        <parameter key="parameter_expression" value=""/>
+        <parameter key="condition_class" value="custom_filters"/>
+        <parameter key="invert_filter" value="false"/>
+        <list key="filters_list">
+          <parameter key="filters_entry_key" value="school.equals.GP"/>
+        </list>
+        <parameter key="filters_logic_and" value="true"/>
+        <parameter key="filters_check_metadata" value="true"/>
+      </operator>
+      <operator activated="true" class="concurrency:correlation_matrix" compatibility="9.3.001" expanded="true" height="103" name="GP" width="90" x="715" y="187">
+        <parameter key="attribute_filter_type" value="all"/>
+        <parameter key="attribute" value=""/>
+        <parameter key="attributes" value=""/>
+        <parameter key="use_except_expression" value="false"/>
+        <parameter key="value_type" value="attribute_value"/>
+        <parameter key="use_value_type_exception" value="false"/>
+        <parameter key="except_value_type" value="time"/>
+        <parameter key="block_type" value="attribute_block"/>
+        <parameter key="use_block_type_exception" value="false"/>
+        <parameter key="except_block_type" value="value_matrix_row_start"/>
+        <parameter key="invert_selection" value="false"/>
+        <parameter key="include_special_attributes" value="false"/>
+        <parameter key="normalize_weights" value="false"/>
+        <parameter key="squared_correlation" value="false"/>
+      </operator>
+      <operator activated="true" class="concurrency:correlation_matrix" compatibility="9.3.001" expanded="true" height="103" name="MS" width="90" x="715" y="34">
+        <parameter key="attribute_filter_type" value="all"/>
+        <parameter key="attribute" value=""/>
+        <parameter key="attributes" value=""/>
+        <parameter key="use_except_expression" value="false"/>
+        <parameter key="value_type" value="attribute_value"/>
+        <parameter key="use_value_type_exception" value="false"/>
+        <parameter key="except_value_type" value="time"/>
+        <parameter key="block_type" value="attribute_block"/>
+        <parameter key="use_block_type_exception" value="false"/>
+        <parameter key="except_block_type" value="value_matrix_row_start"/>
+        <parameter key="invert_selection" value="false"/>
+        <parameter key="include_special_attributes" value="false"/>
+        <parameter key="normalize_weights" value="false"/>
+        <parameter key="squared_correlation" value="false"/>
+      </operator>
+      <connect from_op="Retrieve student-por" from_port="output" to_op="Append" to_port="example set 1"/>
+      <connect from_op="Retrieve student-mat" from_port="output" to_op="Append" to_port="example set 2"/>
+      <connect from_op="Append" from_port="merged set" to_op="Remove Duplicates" to_port="example set input"/>
+      <connect from_op="Remove Duplicates" from_port="example set output" to_op="Multiply" to_port="input"/>
+      <connect from_op="Multiply" from_port="output 1" to_op="School = MS" to_port="example set input"/>
+      <connect from_op="Multiply" from_port="output 2" to_op="School = GP" to_port="example set input"/>
+      <connect from_op="School = MS" from_port="example set output" to_op="MS" to_port="example set"/>
+      <connect from_op="School = GP" from_port="example set output" to_op="GP" to_port="example set"/>
+      <connect from_op="GP" from_port="matrix" to_port="result 2"/>
+      <connect from_op="GP" from_port="weights" to_port="result 4"/>
+      <connect from_op="MS" from_port="matrix" to_port="result 1"/>
+      <connect from_op="MS" from_port="weights" to_port="result 3"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+      <portSpacing port="sink_result 3" spacing="0"/>
+      <portSpacing port="sink_result 4" spacing="0"/>
+      <portSpacing port="sink_result 5" spacing="0"/>
+    </process>
+  </operator>
+</process>
